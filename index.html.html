@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#FDFBF7">
+<title>Simulador Agencia & Sponsor · by Nicki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:       #FDFBF7;
+    --cream-dark:  #F2EDE4;
+    --lila:        #E8DEF8;
+    --lila-mid:    #C9B8F0;
+    --lila-deep:   #7B5EA7;
+    --lila-text:   #4A3570;
+    --mint:        #C8F0E0;
+    --mint-deep:   #2D7A57;
+    --rose:        #FFD6E0;
+    --rose-deep:   #C0446A;
+    --amber:       #FFF0C8;
+    --amber-deep:  #A06800;
+    --peach:       #FFE0EE;
+    --peach-deep:  #B0306A;
+    --sky:         #CCE8FF;
+    --sky-deep:    #1A5FA0;
+    --ink:         #1C1B1F;
+    --ink-soft:    #49454F;
+    --ink-faint:   #79747E;
+    --white:       #FFFFFF;
+    --shadow-soft: 0 4px 24px rgba(123,94,167,.10);
+    --shadow-card: 0 8px 40px rgba(123,94,167,.15);
+    --radius-xl:   24px;
+    --radius-lg:   16px;
+    --radius-md:   12px;
+    --radius-pill: 999px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND BLOBS ────────────────────────────────────── */
+  .bg-blobs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .30; }
+  .blob-1 { width: 380px; height: 380px; background: #FFB3D1; top: -80px; right: -60px; }
+  .blob-2 { width: 320px; height: 320px; background: var(--sky);   bottom: 100px; left: -80px; }
+  .blob-3 { width: 220px; height: 220px; background: var(--lila-mid); top: 42%; right: -50px; }
+
+  /* ── LAYOUT ──────────────────────────────────────────────── */
+  .app {
+    position: relative; z-index: 1;
+    max-width: 480px; margin: 0 auto;
+    padding: 0 20px 140px;
+    min-height: 100dvh;
+    display: flex; flex-direction: column;
+  }
+
+  /* ── BRAND BAR ───────────────────────────────────────────── */
+  .brand-bar {
+    position: sticky; top: 0; z-index: 50;
+    margin: 0 -20px; padding: 0 20px;
+    background: linear-gradient(135deg, #B05010, #A0205A);
+    box-shadow: 0 2px 16px rgba(192,48,106,.35);
+  }
+  .brand-bar-inner {
+    max-width: 480px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; gap: 12px;
+  }
+  .brand-bar-left { display: flex; align-items: center; gap: 10px; }
+  .brand-flag { font-size: 22px; }
+  .brand-bar-text { display: flex; flex-direction: column; gap: 1px; }
+  .brand-bar-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px; color: #fff; font-weight: 400;
+  }
+  .brand-bar-sub { font-size: 10px; color: rgba(255,255,255,.65); }
+  .brand-bar-link {
+    background: rgba(255,255,255,.15); color: #fff;
+    font-size: 12px; font-weight: 600;
+    padding: 6px 12px; border-radius: var(--radius-pill);
+    text-decoration: none; white-space: nowrap;
+    border: 1px solid rgba(255,255,255,.2);
+    transition: background .2s;
+  }
+  .brand-bar-link:hover { background: rgba(255,255,255,.28); }
+
+  /* ── HEADER ──────────────────────────────────────────────── */
+  .header { padding: 32px 0 20px; display: flex; flex-direction: column; gap: 6px; }
+  .header-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #FFE0EE; color: #B0306A;
+    font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    padding: 5px 12px; border-radius: var(--radius-pill);
+    width: fit-content; margin-bottom: 6px;
+  }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(24px, 6.5vw, 30px);
+    line-height: 1.2; color: var(--ink);
+  }
+  .header h1 em { color: var(--peach-deep); font-style: italic; }
+  .header p { font-size: 14px; color: var(--ink-soft); line-height: 1.5; margin-top: 4px; }
+
+  /* ── ÁNIMO BANNER ────────────────────────────────────────── */
+  .animo-banner {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: linear-gradient(135deg, #FFE0EE, #FFF0F6);
+    border: 1px solid #FFB3D1;
+    border-radius: var(--radius-lg);
+    padding: 12px 16px; margin-top: 12px;
+  }
+  .animo-emoji { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .animo-text { font-size: 13px; font-weight: 500; color: var(--peach-deep); line-height: 1.5; }
+
+  /* ── PHASE TABS ──────────────────────────────────────────── */
+  .phase-tabs {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; margin: 20px 0;
+  }
+  .phase-tab {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 12px 10px; border-radius: var(--radius-lg);
+    border: 2px solid transparent;
+    background: var(--white); cursor: pointer;
+    box-shadow: var(--shadow-soft);
+    transition: all .2s;
+  }
+  .phase-tab.active {
+    border-color: var(--peach-deep);
+    background: var(--peach);
+    box-shadow: 0 4px 16px rgba(176,80,16,.2);
+  }
+  .phase-tab-icon { font-size: 22px; }
+  .phase-tab-label {
+    font-size: 12px; font-weight: 700; color: var(--ink-soft);
+    text-align: center; line-height: 1.3;
+  }
+  .phase-tab.active .phase-tab-label { color: var(--peach-deep); }
+  .phase-tab-count {
+    font-size: 11px; color: var(--ink-faint); font-weight: 400;
+  }
+  .phase-tab.active .phase-tab-count { color: var(--peach-deep); opacity: .7; }
+
+  /* ── PROGRESS BAR ────────────────────────────────────────── */
+  .progress-wrap {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px;
+    background: var(--white); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft); margin-bottom: 18px;
+  }
+  .progress-bar-outer {
+    flex: 1; height: 8px; background: var(--cream-dark);
+    border-radius: var(--radius-pill); overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, #FFB3D1, var(--peach-deep));
+    border-radius: var(--radius-pill);
+    transition: width .5s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+  }
+  .progress-text {
+    font-size: 13px; font-weight: 600; color: var(--peach-deep);
+    white-space: nowrap; min-width: 56px; text-align: right;
+  }
+
+  /* ── CONTROLS ROW ────────────────────────────────────────── */
+  .controls-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px; gap: 12px;
+  }
+  .express-toggle {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--white); border-radius: var(--radius-pill);
+    padding: 8px 14px; box-shadow: var(--shadow-soft);
+    cursor: pointer; user-select: none; transition: box-shadow .2s;
+  }
+  .express-toggle:hover { box-shadow: var(--shadow-card); }
+  .express-toggle-label { font-size: 13px; font-weight: 500; color: var(--ink-soft); }
+  .express-toggle-label span { color: var(--rose-deep); font-weight: 600; }
+  .toggle-switch {
+    width: 40px; height: 22px; background: var(--cream-dark);
+    border-radius: var(--radius-pill); position: relative; transition: background .3s;
+  }
+  .toggle-switch::after {
+    content: ''; position: absolute;
+    width: 16px; height: 16px; background: var(--white);
+    border-radius: 50%; top: 3px; left: 3px;
+    transition: transform .3s; box-shadow: 0 1px 4px rgba(0,0,0,.2);
+  }
+  .toggle-switch.active { background: var(--rose-deep); }
+  .toggle-switch.active::after { transform: translateX(18px); }
+  .counter-badge {
+    display: flex; align-items: center; gap: 5px;
+    background: var(--mint); color: var(--mint-deep);
+    font-size: 13px; font-weight: 600;
+    padding: 8px 14px; border-radius: var(--radius-pill);
+  }
+
+  /* ── TIMER ───────────────────────────────────────────────── */
+  .timer-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    margin-bottom: 14px;
+    opacity: 0; transform: translateY(-8px);
+    transition: opacity .3s, transform .3s;
+    pointer-events: none;
+  }
+  .timer-wrap.visible { opacity: 1; transform: none; pointer-events: auto; }
+  .timer-ring-wrap { position: relative; width: 72px; height: 72px; }
+  .timer-ring { width: 72px; height: 72px; transform: rotate(-90deg); }
+  .timer-ring circle { fill: none; stroke-width: 5; }
+  .timer-ring .track { stroke: var(--cream-dark); }
+  .timer-ring .fill {
+    stroke: var(--rose-deep); stroke-dasharray: 201; stroke-dashoffset: 0;
+    stroke-linecap: round; transition: stroke-dashoffset .9s linear, stroke .3s;
+  }
+  .timer-number {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--rose-deep);
+  }
+  .timer-label { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faint); }
+
+  /* ── CARD SCENE ──────────────────────────────────────────── */
+  .card-scene { perspective: 1200px; margin-bottom: 22px; cursor: pointer; }
+  .card-inner {
+    position: relative; width: 100%; min-height: 340px;
+    transform-style: preserve-3d;
+    transition: transform .65s cubic-bezier(.4,0,.2,1);
+  }
+  .card-inner.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    border-radius: var(--radius-xl); padding: 28px 24px;
+    display: flex; flex-direction: column;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* FRONT */
+  .card-front { background: var(--white); }
+  .card-front-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 16px;
+  }
+  .card-meta { display: flex; flex-direction: column; gap: 4px; }
+  .card-number { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); }
+  .card-phase-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: var(--radius-pill);
+  }
+  .pill-agency  { background: #FFE0EE; color: #B0306A; }
+  .pill-sponsor { background: var(--sky);    color: var(--sky-deep); }
+  .card-tap-hint { font-size: 11px; color: var(--ink-faint); display: flex; align-items: center; gap: 4px; }
+  .card-question {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(18px, 5vw, 22px);
+    line-height: 1.4; color: var(--ink);
+    flex: 1; display: flex; align-items: center;
+  }
+  .card-front-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 22px; padding-top: 16px;
+    border-top: 1px solid var(--cream-dark);
+  }
+  .audio-btn {
+    display: flex; align-items: center; gap: 7px;
+    background: #FFE0EE; color: #B0306A;
+    border: none; border-radius: var(--radius-pill);
+    padding: 9px 16px; font-size: 13px; font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer; transition: background .2s, transform .1s;
+  }
+  .audio-btn:hover { background: #FFB3D1; }
+  .audio-btn:active { transform: scale(.96); }
+  .audio-btn.speaking { background: #FFB3D1; animation: pulse-audio 1s infinite; }
+  @keyframes pulse-audio {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,150,200,.5); }
+    50%      { box-shadow: 0 0 0 8px rgba(255,150,200,0); }
+  }
+  .flip-hint { font-size: 12px; color: var(--ink-faint); display: flex; align-items: center; gap: 4px; }
+
+  /* BACK */
+  .card-back {
+    background: linear-gradient(145deg, #9B2060, #6A1040);
+    transform: rotateY(180deg);
+    overflow-y: auto; position: absolute; inset: 0;
+    border-radius: var(--radius-xl); backface-visibility: hidden;
+  }
+  .card-back-scroll { padding: 24px 22px; display: flex; flex-direction: column; gap: 14px; min-height: 100%; }
+  .back-title { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.45); margin-bottom: -4px; }
+
+  .back-section { border-radius: var(--radius-lg); padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .back-section-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .back-section-text { font-size: 14px; line-height: 1.55; }
+
+  .section-lafija { background: rgba(255,255,255,.10); }
+  .section-lafija .back-section-label { color: #FFB3D1; }
+  .section-lafija .back-section-text { color: rgba(255,255,255,.92); }
+
+  .section-redflags { background: rgba(255,100,100,.15); }
+  .section-redflags .back-section-label { color: #FFB4B4; }
+  .section-redflags .back-section-text { color: rgba(255,255,255,.88); }
+
+  .answers-grid { display: flex; flex-direction: column; gap: 10px; }
+  .answer-pill { border-radius: var(--radius-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .answer-pill-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .answer-pill-text { font-size: 13px; line-height: 1.55; }
+
+  .answer-chill   { background: rgba(255,255,255,.10); }
+  .answer-chill   .answer-pill-label { color: rgba(255,255,255,.5); }
+  .answer-chill   .answer-pill-text  { color: rgba(255,255,255,.88); }
+  .answer-advanced { background: rgba(255,180,210,.15); border: 1px solid rgba(255,180,210,.25); }
+  .answer-advanced .answer-pill-label { color: #FFB3D1; }
+  .answer-advanced .answer-pill-text  { color: rgba(255,255,255,.95); font-style: italic; }
+
+  /* ── ACTION BUTTONS ──────────────────────────────────────── */
+  .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+  .action-btn {
+    border: none; border-radius: var(--radius-lg);
+    padding: 16px; font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: transform .15s, box-shadow .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .action-btn:active { transform: scale(.96); }
+  .btn-dominate { background: var(--mint); color: var(--mint-deep); box-shadow: 0 4px 16px rgba(45,122,87,.15); }
+  .btn-dominate:hover { box-shadow: 0 6px 20px rgba(45,122,87,.25); }
+  .btn-repeat   { background: var(--rose); color: var(--rose-deep); box-shadow: 0 4px 16px rgba(192,68,106,.12); }
+  .btn-repeat:hover   { box-shadow: 0 6px 20px rgba(192,68,106,.22); }
+
+  /* ── NAV ─────────────────────────────────────────────────── */
+  .nav-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; }
+  .nav-btn {
+    background: var(--white); border: none; border-radius: var(--radius-pill);
+    padding: 10px 20px; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    cursor: pointer; box-shadow: var(--shadow-soft); transition: background .2s, color .2s;
+  }
+  .nav-btn:hover { background: #FFE0EE; color: #B0306A; }
+  .dots-wrap { display: flex; gap: 6px; align-items: center; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cream-dark); transition: all .3s; cursor: pointer; }
+  .dot.active { background: var(--peach-deep); transform: scale(1.3); }
+  .dot.done   { background: var(--mint-deep); }
+
+  /* ── MASTERED ────────────────────────────────────────────── */
+  .mastered-section { background: var(--mint); border-radius: var(--radius-xl); padding: 20px; margin-bottom: 20px; display: none; }
+  .mastered-section.visible { display: block; }
+  .mastered-title { font-size: 13px; font-weight: 700; color: var(--mint-deep); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .mastered-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .mastered-chip { background: rgba(255,255,255,.7); color: var(--mint-deep); font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: var(--radius-pill); }
+
+  /* ── COMPLETION ──────────────────────────────────────────── */
+  .completion-screen { display: none; flex-direction: column; align-items: center; text-align: center; gap: 16px; padding: 32px 0; }
+  .completion-screen.visible { display: flex; }
+  .completion-emoji { font-size: 64px; animation: bounce-in .5s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes bounce-in { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .completion-title { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--ink); }
+  .completion-title em { color: var(--peach-deep); }
+  .completion-subtitle { font-size: 15px; color: var(--ink-soft); line-height: 1.55; }
+  .restart-btn {
+    background: var(--peach-deep); color: var(--white);
+    border: none; border-radius: var(--radius-pill);
+    padding: 15px 32px; font-family: 'DM Sans', sans-serif;
+    font-size: 16px; font-weight: 600;
+    cursor: pointer; transition: transform .15s, box-shadow .2s;
+    box-shadow: 0 6px 20px rgba(176,48,106,.3);
+  }
+  .restart-btn:active { transform: scale(.97); }
+
+  /* ── CONFETTI ────────────────────────────────────────────── */
+  .confetti-container { position: fixed; inset: 0; pointer-events: none; z-index: 999; overflow: hidden; }
+  .confetti-piece { position: absolute; border-radius: 2px; animation: fall linear forwards; top: -20px; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+  /* ── FOOTER ACTIONS ──────────────────────────────────────── */
+  .footer-actions {
+    background: var(--white); border-radius: var(--radius-xl);
+    padding: 22px 20px; margin-bottom: 16px;
+    box-shadow: var(--shadow-soft); display: flex; flex-direction: column; gap: 14px;
+  }
+  .footer-actions-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--ink); text-align: center; }
+  .footer-btns-row { display: flex; flex-direction: column; gap: 10px; }
+  .footer-btn {
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    padding: 14px 20px; border-radius: var(--radius-lg);
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+    border: none; cursor: pointer; text-decoration: none;
+    transition: transform .15s, box-shadow .2s;
+  }
+  .footer-btn:active { transform: scale(.97); }
+  .footer-btn-ig  { background: linear-gradient(135deg, #FFE0EE, #FFB3D1); color: #B0306A; box-shadow: 0 4px 16px rgba(176,48,106,.15); }
+  .footer-btn-ig:hover { box-shadow: 0 6px 20px rgba(176,48,106,.25); }
+
+  /* ── PROMO BANNER ────────────────────────────────────────── */
+  .promo-banner {
+    display: block; text-decoration: none;
+    background: linear-gradient(135deg, var(--lila-deep), #3D2B6B);
+    border-radius: var(--radius-xl); padding: 20px; margin-bottom: 16px;
+    box-shadow: 0 8px 32px rgba(123,94,167,.3);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .promo-banner:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(123,94,167,.4); }
+  .promo-banner-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .promo-left { display: flex; flex-direction: column; gap: 10px; }
+  .promo-title { font-family: 'DM Serif Display', serif; font-size: 17px; color: #fff; }
+  .promo-items { display: flex; flex-wrap: wrap; gap: 6px; }
+  .promo-items span { background: rgba(255,255,255,.12); color: rgba(255,255,255,.9); font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: var(--radius-pill); border: 1px solid rgba(255,255,255,.15); }
+  .promo-cta { background: var(--lila); color: var(--lila-text); font-size: 13px; font-weight: 700; padding: 10px 16px; border-radius: var(--radius-pill); white-space: nowrap; flex-shrink: 0; }
+
+  /* ── TOAST ───────────────────────────────────────────────── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--ink); color: var(--white);
+    font-size: 14px; font-weight: 500;
+    padding: 12px 24px; border-radius: var(--radius-pill);
+    transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s;
+    opacity: 0; z-index: 100; white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* ── FOOTER ──────────────────────────────────────────────── */
+  .footer { text-align: center; padding: 16px 0 0; font-size: 12px; color: var(--ink-faint); }
+  .footer a { color: var(--peach-deep); text-decoration: none; font-weight: 600; }
+
+
+  /* ── HOW TO USE ──────────────────────────────────────────── */
+  .howto-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: 20px 20px 16px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-soft);
+    border: 1.5px solid #FFB3D1;
+  }
+  .howto-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px; color: var(--ink);
+    margin-bottom: 14px;
+  }
+  .howto-steps { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .howto-step { display: flex; align-items: flex-start; gap: 10px; }
+  .howto-num {
+    width: 24px; height: 24px; flex-shrink: 0;
+    background: #FFE0EE; color: #B0306A;
+    font-size: 12px; font-weight: 800;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .howto-text { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+  .howto-text strong { color: var(--ink); }
+  .howto-tip {
+    background: var(--amber); border-radius: var(--radius-md);
+    padding: 10px 14px; font-size: 12px; color: var(--amber-deep);
+    line-height: 1.5;
+  }
+
+  /* ── FOOTER ACTIONS subtitle ─────────────────────────────── */
+  .footer-actions-sub {
+    font-size: 13px; color: var(--ink-faint);
+    text-align: center; line-height: 1.5;
+    margin-top: -6px;
+  }
+
+  /* ── PROMO COMING SOON BANNER ────────────────────────────── */
+  .promo-coming-soon {
+    background: linear-gradient(145deg, #2C1A4A, #1A0F2E);
+    cursor: default;
+  }
+  .promo-coming-soon:hover { transform: none; box-shadow: 0 8px 32px rgba(123,94,167,.3); }
+  .promo-banner-inner-col {
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .promo-resources-grid { display: flex; flex-direction: column; gap: 8px; }
+  .promo-resource-item {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,.07);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  .promo-resource-icon { font-size: 18px; flex-shrink: 0; }
+  .promo-resource-name { flex: 1; font-size: 13px; color: rgba(255,255,255,.9); font-weight: 500; }
+  .promo-resource-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; padding: 3px 8px; border-radius: var(--radius-pill);
+    flex-shrink: 0;
+  }
+  .badge-soon { background: rgba(255,220,100,.2); color: #FFD966; border: 1px solid rgba(255,220,100,.3); }
+  .badge-live { background: rgba(180,255,180,.2); color: #80E080; border: 1px solid rgba(180,255,180,.3); }
+  .promo-notify-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; flex-wrap: wrap;
+    background: rgba(255,255,255,.06); border-radius: var(--radius-md);
+    padding: 10px 14px;
+  }
+  .promo-notify-text { font-size: 12px; color: rgba(255,255,255,.65); flex: 1; line-height: 1.4; }
+  .promo-notify-btn {
+    background: var(--lila); color: var(--lila-text);
+    font-size: 12px; font-weight: 700;
+    padding: 7px 14px; border-radius: var(--radius-pill);
+    text-decoration: none; white-space: nowrap; flex-shrink: 0;
+  }
+
+  /* ── PROMO MONEY BANNER ──────────────────────────────────── */
+  .promo-money {
+    background: linear-gradient(135deg, #1A4A1A, #0F2E0F);
+  }
+  .promo-money:hover { box-shadow: 0 12px 40px rgba(45,122,87,.4); }
+  .promo-money-inner {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .promo-money-emoji { font-size: 36px; flex-shrink: 0; }
+  .promo-money-text { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .promo-money-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px; color: #fff; line-height: 1.2;
+  }
+  .promo-money-sub { font-size: 12px; color: rgba(255,255,255,.6); line-height: 1.4; }
+  .promo-money-cta {
+    background: var(--mint); color: var(--mint-deep);
+    font-size: 14px; font-weight: 800;
+    padding: 10px 16px; border-radius: var(--radius-pill);
+    white-space: nowrap; flex-shrink: 0;
+  }
+
+
+  /* ── BY NICKI ────────────────────────────────────────────── */
+  .by-nicki {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 8vw, 38px);
+    color: var(--peach-deep);
+    letter-spacing: -.01em;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+  .by-nicki span {
+    background: linear-gradient(135deg, #C0306A, #8A1A4A);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-style: italic;
+  }
+
+  /* ── GLOSSARY ────────────────────────────────────────────── */
+  .glossary-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: 22px 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-soft);
+    border: 1.5px solid #FFB3D1;
+  }
+  .glossary-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px; color: var(--ink); margin-bottom: 4px;
+  }
+  .glossary-subtitle {
+    font-size: 13px; color: var(--ink-faint); margin-bottom: 18px;
+  }
+  .glossary-items { display: flex; flex-direction: column; gap: 6px; }
+  .glossary-divider {
+    text-align: center; font-size: 18px; color: var(--ink-faint);
+    margin: 2px 0;
+  }
+  .glossary-item {
+    background: var(--cream);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .glossary-item-header {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .glossary-icon { font-size: 20px; flex-shrink: 0; }
+  .glossary-item-title {
+    font-size: 16px; font-weight: 700; color: var(--ink);
+  }
+  .glossary-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; padding: 3px 8px;
+    border-radius: var(--radius-pill);
+  }
+  .tag-local { background: #FFE0EE; color: #B0306A; }
+  .tag-usa   { background: #CCE8FF; color: #1A5FA0; }
+  .tag-work  { background: var(--mint); color: var(--mint-deep); }
+  .glossary-item-desc {
+    font-size: 13px; color: var(--ink-soft); line-height: 1.55;
+  }
+  .glossary-item-tip {
+    background: var(--white);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    font-size: 12px; color: var(--ink-soft); line-height: 1.5;
+    border-left: 3px solid #FFB3D1;
+  }
+  .glossary-summary {
+    display: flex; flex-direction: column; gap: 4px;
+    background: linear-gradient(135deg, #FFE0EE, #FFF0F6);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px; margin-top: 6px;
+    border: 1px solid #FFB3D1;
+  }
+  .glossary-summary-text {
+    font-size: 11px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: #B0306A;
+  }
+  .glossary-summary-flow {
+    font-size: 14px; font-weight: 600; color: var(--ink);
+    line-height: 1.4;
+  }
+
+  @media (max-width: 360px) { .app { padding: 0 14px 120px; } }
+</style>
+</head>
+<body>
+
+<div class="bg-blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<div class="confetti-container" id="confettiContainer"></div>
+
+<div class="app">
+
+  <!-- BRAND BAR -->
+  <div class="brand-bar">
+    <div class="brand-bar-inner">
+      <div class="brand-bar-left">
+        <span class="brand-flag">🏢</span>
+        <div class="brand-bar-text">
+          <span class="brand-bar-title">Work &amp; Travel con Nicki</span>
+          <span class="brand-bar-sub">by @nickixl_ · No soy agencia. Soy la que ya lo vivió 💜</span>
+        </div>
+      </div>
+      <a href="https://linktr.ee/nickiwat" target="_blank" class="brand-bar-link">Ver todo →</a>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-badge">🏢 Filtro Cero · Agencia &amp; Sponsor</div>
+    <div class="by-nicki">by <span>@nickixl_</span></div>
+    <h1>Pasa el filtro.<br><em>Sin sorpresas.</em></h1>
+    <p>15 preguntas reales de agencia y sponsor · Flip para el Método Nicki · Modo Express 15s</p>
+    <div class="animo-banner">
+      <span class="animo-emoji">🔥</span>
+      <span class="animo-text">Esta entrevista es más fácil de lo que crees. Solo necesitas saber qué quieren escuchar — y eso es exactamente lo que tienes aquí.</span>
+    </div>
+  </header>
+
+  <!-- HOW TO USE -->
+  <div class="howto-card">
+    <div class="howto-title">ok pero... ¿cómo uso esto? 👀</div>
+    <div class="howto-steps">
+      <div class="howto-step">
+        <span class="howto-num">1</span>
+        <span class="howto-text">Elige si practicar el filtro de <strong>agencia</strong> o la entrevista del <strong>sponsor</strong> 👇</span>
+      </div>
+      <div class="howto-step">
+        <span class="howto-num">2</span>
+        <span class="howto-text"><strong>Toca la tarjeta</strong> para voltearla y ver la respuesta con el Método Nicki ✨</span>
+      </div>
+      <div class="howto-step">
+        <span class="howto-num">3</span>
+        <span class="howto-text">Si la dominaste, toca <strong>"¡La dominé!"</strong> — si no, <strong>"Repetir luego"</strong> 🔄</span>
+      </div>
+      <div class="howto-step">
+        <span class="howto-num">4</span>
+        <span class="howto-text">Activa el <strong>Modo Express ⚡</strong> para simular presión real con 15 segundos por pregunta 😅</span>
+      </div>
+    </div>
+    <div class="howto-tip">
+      💅 <em>tip nicki:</em> practica en voz alta frente al espejo. suena cringe pero funciona.
+    </div>
+  </div>
+
+  <!-- GLOSSARY: AGENCIA vs SPONSOR vs EMPLEADOR -->
+  <div class="glossary-card">
+    <div class="glossary-title">espera... ¿cuál es la diferencia? 🤔</div>
+    <div class="glossary-subtitle">antes de practicar, aclaremos quién es quién:</div>
+    <div class="glossary-items">
+      <div class="glossary-item">
+        <div class="glossary-item-header">
+          <span class="glossary-icon">🏢</span>
+          <span class="glossary-item-title">Agencia</span>
+          <span class="glossary-tag tag-local">Perú / Latam</span>
+        </div>
+        <div class="glossary-item-desc">La empresa local que te ayuda a gestionar todo el papeleo, conseguir el sponsor y prepararte antes de viajar. Tú le pagas a ella. Ej: ADE, CCEX, Interlink.</div>
+        <div class="glossary-item-tip">💡 Con la agencia tienes el filtro inicial — te evalúan antes de mandarte al sponsor.</div>
+      </div>
+      <div class="glossary-divider">↓</div>
+      <div class="glossary-item">
+        <div class="glossary-item-header">
+          <span class="glossary-icon">🤝</span>
+          <span class="glossary-item-title">Sponsor</span>
+          <span class="glossary-tag tag-usa">USA · Legal</span>
+        </div>
+        <div class="glossary-item-desc">La organización americana autorizada por el gobierno de EE.UU. que emite tu DS-2019 (el documento clave de tu visa J-1). Es tu respaldo legal durante todo el viaje. Ej: CIEE, InterExchange, CCUSA.</div>
+        <div class="glossary-item-tip">💡 El sponsor NO es tu empleador. Es quien te protege legalmente. Si tienes un problema en el trabajo, llamas al sponsor.</div>
+      </div>
+      <div class="glossary-divider">↓</div>
+      <div class="glossary-item">
+        <div class="glossary-item-header">
+          <span class="glossary-icon">👔</span>
+          <span class="glossary-item-title">Empleador</span>
+          <span class="glossary-tag tag-work">Tu trabajo · USA</span>
+        </div>
+        <div class="glossary-item-desc">El hotel, restaurante o resort donde físicamente vas a trabajar y ganar tus dólares. Ellos te dan el job offer (la oferta de trabajo) y en muchos casos también el housing.</div>
+        <div class="glossary-item-tip">💡 Tú trabajas PARA el empleador pero estás protegida POR el sponsor. Son dos cosas distintas.</div>
+      </div>
+    </div>
+    <div class="glossary-summary">
+      <span class="glossary-summary-text">resumen en una línea:</span>
+      <span class="glossary-summary-flow">Agencia 🇵🇪 → Sponsor 📋 → Empleador 💼 = tú con dólares 💸</span>
+    </div>
+  </div>
+
+  <!-- PHASE TABS -->
+  <div class="phase-tabs">
+    <div class="phase-tab active" id="tab-agency" onclick="filterPhase('agency')">
+      <span class="phase-tab-icon">🏢</span>
+      <span class="phase-tab-label">Filtro Agencia</span>
+      <span class="phase-tab-count">8 preguntas</span>
+    </div>
+    <div class="phase-tab" id="tab-sponsor" onclick="filterPhase('sponsor')">
+      <span class="phase-tab-icon">🤝</span>
+      <span class="phase-tab-label">Entrevista Sponsor</span>
+      <span class="phase-tab-count">7 preguntas</span>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <span style="font-size:16px">🎯</span>
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" id="progressBar"></div>
+    </div>
+    <div class="progress-text" id="progressText">0 / 15</div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls-row">
+    <div class="express-toggle" onclick="toggleExpress()">
+      <div class="toggle-switch" id="toggleSwitch"></div>
+      <span class="express-toggle-label"><span>⚡</span> Modo Express</span>
+    </div>
+    <div class="counter-badge">✅ <span id="dominatedCount">0</span> dominadas</div>
+  </div>
+
+  <!-- TIMER -->
+  <div class="timer-wrap" id="timerWrap">
+    <div class="timer-ring-wrap">
+      <svg class="timer-ring" viewBox="0 0 72 72">
+        <circle class="track" cx="36" cy="36" r="32"/>
+        <circle class="fill" id="timerRing" cx="36" cy="36" r="32"/>
+      </svg>
+      <div class="timer-number" id="timerNumber">15</div>
+    </div>
+    <div class="timer-label">segundos restantes</div>
+  </div>
+
+  <!-- CARD SCENE -->
+  <div class="card-scene" id="cardScene" onclick="flipCard()">
+    <div class="card-inner" id="cardInner">
+      <div class="card-face card-front">
+        <div class="card-front-header">
+          <div class="card-meta">
+            <span class="card-number" id="cardNumber">Pregunta 1 de 15</span>
+            <span class="card-phase-pill pill-agency" id="cardPhasePill">🏢 Agencia</span>
+          </div>
+          <span class="card-tap-hint">toca para ver</span>
+        </div>
+        <div class="card-question" id="cardQuestion">Cargando...</div>
+        <div class="card-front-footer">
+          <button class="audio-btn" id="audioBtn" onclick="event.stopPropagation(); speakQuestion()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            Escuchar
+          </button>
+          <span class="flip-hint">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            Voltear
+          </span>
+        </div>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-back-scroll">
+          <div class="back-title">Método Nicki ✨</div>
+          <div class="back-section section-lafija">
+            <div class="back-section-label">💡 La Fija</div>
+            <div class="back-section-text" id="backLaFija"></div>
+          </div>
+          <div class="back-section section-redflags">
+            <div class="back-section-label">🚩 Red Flags — NO digas</div>
+            <div class="back-section-text" id="backRedFlags"></div>
+          </div>
+          <div class="answers-grid">
+            <div class="answer-pill answer-chill">
+              <div class="answer-pill-label">😌 Respuesta Normal Chill</div>
+              <div class="answer-pill-text" id="backChill"></div>
+            </div>
+            <div class="answer-pill answer-advanced">
+              <div class="answer-pill-label">⭐ Respuesta Avanzada</div>
+              <div class="answer-pill-text" id="backAdvanced"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="action-row">
+    <button class="action-btn btn-dominate" onclick="markDominated()">✅ ¡La dominé!</button>
+    <button class="action-btn btn-repeat"   onclick="markRepeat()">🔄 Repetir luego</button>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav-row">
+    <button class="nav-btn" onclick="prevCard()">← Anterior</button>
+    <div class="dots-wrap" id="dotsWrap"></div>
+    <button class="nav-btn" onclick="nextCard()">Siguiente →</button>
+  </div>
+
+  <!-- MASTERED -->
+  <div class="mastered-section" id="masteredSection">
+    <div class="mastered-title">🏆 Preguntas dominadas</div>
+    <div class="mastered-chips" id="masteredChips"></div>
+  </div>
+
+  <!-- COMPLETION -->
+  <div class="completion-screen" id="completionScreen">
+    <div class="completion-emoji">🏆</div>
+    <div class="completion-title">¡Eres la candidata<br><em>más preparada!</em></div>
+    <p class="completion-subtitle">Pasaste por las 15 preguntas del filtro. Ahora la agencia y el sponsor van a ver a alguien que sabe exactamente lo que hace. Besos, bye 💋</p>
+    <button class="restart-btn" onclick="restartAll()">🔄 Volver a empezar</button>
+  </div>
+
+  <!-- FOOTER ACTIONS -->
+  <div class="footer-actions">
+    <div class="footer-actions-title">¿quieres más ayuda? <span style="font-family:inherit">hablame 🫶</span></div>
+    <p class="footer-actions-sub">si tienes alguna duda, te quedaste trabada en algo o simplemente quieres contarme cómo te fue — estoy aquí.</p>
+    <div class="footer-btns-row">
+      <a href="https://instagram.com/nickixl_" target="_blank" class="footer-btn footer-btn-ig">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        escríbeme al insta @nickixl_ 💬
+      </a>
+    </div>
+  </div>
+
+  <!-- PROMO BANNER 1 — Recursos próximamente -->
+  <div class="promo-banner promo-coming-soon">
+    <div class="promo-banner-inner-col">
+      <div class="promo-title">todo lo que necesitas para tu J-1 👇</div>
+      <div class="promo-resources-grid">
+        <div class="promo-resource-item">
+          <span class="promo-resource-icon">🏛️</span>
+          <span class="promo-resource-name">Simulador preguntas embajada</span>
+          <span class="promo-resource-badge badge-soon">próximamente</span>
+        </div>
+        <div class="promo-resource-item">
+          <span class="promo-resource-icon">📚</span>
+          <span class="promo-resource-name">Guía master J-1 PDF</span>
+          <span class="promo-resource-badge badge-soon">próximamente</span>
+        </div>
+        <div class="promo-resource-item">
+          <span class="promo-resource-icon">🧮</span>
+          <span class="promo-resource-name">Calculadora de horas y dinero</span>
+          <span class="promo-resource-badge badge-soon">próximamente</span>
+        </div>
+        <div class="promo-resource-item">
+          <span class="promo-resource-icon">📊</span>
+          <span class="promo-resource-name">Plantilla de ahorro J-1</span>
+          <span class="promo-resource-badge badge-soon">próximamente</span>
+        </div>
+        <div class="promo-resource-item">
+          <span class="promo-resource-icon">✈️</span>
+          <span class="promo-resource-name">Arma tu viaje aquí</span>
+          <span class="promo-resource-badge badge-soon">próximamente</span>
+        </div>
+      </div>
+      <div class="promo-notify-row">
+        <span class="promo-notify-text">🔔 sígueme para ser la primera en saber cuando salga todo esto</span>
+        <a href="https://instagram.com/nickixl_" target="_blank" class="promo-notify-btn">@nickixl_</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROMO BANNER 2 — USD 20K CTA -->
+  <a href="https://linktr.ee/nickiwat" target="_blank" class="promo-banner promo-money">
+    <div class="promo-money-inner">
+      <div class="promo-money-emoji">💸</div>
+      <div class="promo-money-text">
+        <div class="promo-money-title">haz más de USD 20K en tu WAT</div>
+        <div class="promo-money-sub">la guía completa de cómo maximizar tus ganancias está aquí 👉</div>
+      </div>
+      <div class="promo-money-cta">ver →</div>
+    </div>
+  </a>
+
+  <footer class="footer">
+    by <a href="https://instagram.com/nickixl_" target="_blank">@nickixl_</a> · No soy agencia. Soy la que ya lo vivió. 💜
+  </footer>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA LAYER ────────────────────────────────────────────────
+const CARDS = [
+  // ── AGENCIA (8 preguntas) ──────────────────────────────────
+  {
+    phase: "agency",
+    question: "Why do you want to participate in the Work and Travel program?",
+    laFija: "Quieren confirmar que tu motivación principal es el intercambio cultural — es el requisito del gobierno para la visa J-1. El dinero puede ser una consecuencia, nunca el motivo declarado.",
+    redFlags: '"To make a lot of money" · "To pay my debts" · "To buy an iPhone"',
+    chill: "I want to improve my English, learn about American culture, and gain work experience.",
+    advanced: "My main goal is to immerse myself in American culture, practice my conversational English with native speakers, and challenge myself by working in a completely new environment."
+  },
+  {
+    phase: "agency",
+    question: "What are you currently studying and why did you choose that major?",
+    laFija: "Verifican tu nivel de inglés con vocabulario académico y confirman que eres un estudiante real y comprometido con su carrera.",
+    redFlags: 'Responder con una sola palabra ("Marketing") o no saber explicar de qué trata tu carrera en inglés.',
+    chill: "I study [Carrera] because I like it and I want to work in [Sector] in the future.",
+    advanced: "I am currently pursuing a degree in Marketing. I chose this path because I am passionate about consumer behavior and digital business strategies."
+  },
+  {
+    phase: "agency",
+    question: "What kind of job are you looking for and are you willing to do physical work?",
+    laFija: "Quieren matar expectativas irreales. Buscan flexibilidad y confirmar que estás dispuesta a hacer trabajos operativos (limpiar, cargar, atender) sin quejarte.",
+    redFlags: '"I only want to be a cashier" · "I don\'t like cleaning" · "I want a desk job"',
+    chill: "I am open to any position. I know this is a cultural exchange and I am ready to work hard as a housekeeper, server, or prep cook.",
+    advanced: "I am completely flexible. I understand these are entry-level operational roles. Whether it\'s housekeeping, dishwashing, or food service, I\'m ready to work hard and be a team player."
+  },
+  {
+    phase: "agency",
+    question: "How would you handle a difficult or angry customer at work?",
+    laFija: "Miden tu madurez emocional y tu nivel de Customer Service. Quieren saber si puedes manejar un cliente difícil sin explotar ni bloquearte.",
+    redFlags: '"I would yell back" · "I would ignore them" · "I would cry"',
+    chill: "I would stay calm, listen to the customer, apologize, and call my manager for help.",
+    advanced: "I would remain calm and professional. I\'d actively listen to their complaint without interrupting, apologize for the inconvenience, and try to find a quick solution. If beyond my control, I would immediately involve my supervisor."
+  },
+  {
+    phase: "agency",
+    question: "Have you ever lived away from your parents or shared a room with strangers?",
+    laFija: "Evalúan tu adaptabilidad al housing compartido. En USA probablemente vivirás con 3 personas más en un cuarto pequeño. Quieren saber si vas a causar dramas de convivencia.",
+    redFlags: '"I need my own room" · "I can\'t sleep with noise" · "My mom does my laundry"',
+    chill: "Yes, I am a very organized person and I respect other people\'s space and rules.",
+    advanced: "While I currently live with my family, I am highly independent. I know how to cook, clean, and manage my responsibilities. I am very adaptable and looking forward to sharing a house with international roommates."
+  },
+  {
+    phase: "agency",
+    question: "What would you do if you get lost in the US or have an emergency?",
+    laFija: "Evalúan tu capacidad de resolución de problemas y sentido común. Quieren ver que no eres dependiente y que conoces los recursos disponibles.",
+    redFlags: '"I would panic" · "I would just call my mom in Peru"',
+    chill: "I would use Google Maps on my phone, ask a police officer for help, or call my sponsor\'s emergency number.",
+    advanced: "I always keep my phone charged and data available. In a real emergency, my first step would be calling 911, then immediately contacting my Sponsor\'s 24/7 support line since they are my legal representatives."
+  },
+  {
+    phase: "agency",
+    question: "Tell me about a time you had to adapt to a new or difficult situation.",
+    laFija: "El clásico Behavioral Question. Quieren pruebas reales de que no te rindes a la primera dificultad. Usa la estructura: Situación → Acción → Resultado.",
+    redFlags: '"I have never had a difficult situation" · Contar una historia donde tú fuiste el problemático.',
+    chill: "In my university, I had a group project with difficult people. I stayed calm, organized the tasks, and we finished successfully.",
+    advanced: "When I took on a coordination role for an international event, we faced sudden schedule changes. I quickly adapted, reorganized the team\'s shifts under pressure, and ensured everything ran smoothly."
+  },
+  {
+    phase: "agency",
+    question: "What part of American culture are you most excited to experience?",
+    laFija: "Cierre con vibra positiva. Confirman una vez más el aspecto cultural del programa. Mostrar curiosidad genuina, no interés en compras o fiestas.",
+    redFlags: '"Black Friday sales" · "Going to parties" · "Shopping malls"',
+    chill: "I am excited to see the snow, eat traditional American food, and celebrate holidays like Thanksgiving.",
+    advanced: "I\'m really looking forward to experiencing the local community life, trying authentic regional food, and interacting daily with locals. Coming from Lima, experiencing a real snowy season is something I\'ve always dreamed of."
+  },
+  // ── SPONSOR (7 preguntas) ──────────────────────────────────
+  {
+    phase: "sponsor",
+    question: "Tell me about yourself.",
+    laFija: "El clásico rompehielo. Evalúan tu fluidez inicial, tu confianza y tu capacidad de resumir tu perfil en 30-45 segundos sin trabarte ni sonar memorizado.",
+    redFlags: "Contar toda tu historia de vida desde la infancia · Respuestas de una sola palabra · Sonar como robot recitando.",
+    chill: "I am [Age] years old, I study [Major] in Peru, and I love traveling and learning new things.",
+    advanced: "I\'m a proactive student from Lima currently majoring in Marketing. I enjoy working in dynamic environments and I\'m always eager to learn from new cultures and take on new challenges."
+  },
+  {
+    phase: "sponsor",
+    question: "What are your strengths and weaknesses?",
+    laFija: "Pregunta clásica de RR.HH. Buscan honestidad, pero evalúan que tu debilidad no sea un peligro para el trabajo operativo. La debilidad debe tener una solución activa.",
+    redFlags: '"I have no weaknesses" · "I am very lazy" · "I hate waking up early"',
+    chill: "My strength is that I work hard. My weakness is that sometimes I am shy, but I want to improve by speaking more English.",
+    advanced: "One of my strengths is adaptability — I learn quickly in fast-paced environments. A weakness is that I can be a bit of a perfectionist, but I\'m learning to balance quality with efficiency under pressure."
+  },
+  {
+    phase: "sponsor",
+    question: "What would you do if you don't understand a customer?",
+    laFija: "Prueba de fuego para roles de servicio. Quieren saber que no te vas a paralizar ni a ignorar al cliente que te habla rápido con acento.",
+    redFlags: '"I just walk away" · "I ignore them" · "I say I don\'t speak English"',
+    chill: "I would politely ask them to repeat, or ask my manager to help me.",
+    advanced: "I would politely ask them to speak a bit slower: \'Excuse me, could you repeat that?\'. If I still don\'t understand, I would quickly find a coworker or manager to ensure the customer gets what they need."
+  },
+  {
+    phase: "sponsor",
+    question: "Are you comfortable working long hours, during holidays, or standing for long periods?",
+    laFija: "Gestión brutal de expectativas. Work and Travel es trabajo físico duro en plena temporada alta. Quieren escuchar que estás lista para trabajar de verdad, no de vacaciones.",
+    redFlags: '"No, I need to rest on holidays" · "I can only stand for 2 hours before my feet hurt"',
+    chill: "Yes, I am completely fine with that. I am ready to work hard.",
+    advanced: "Absolutely. I understand that hospitality requires standing for long periods and working during the busiest holidays. I have the stamina, the energy, and the right attitude for it."
+  },
+  {
+    phase: "sponsor",
+    question: "Can you work in a team? / How would your friends describe you?",
+    laFija: "Fit cultural. Vas a convivir en una casa pequeña y trabajar bajo presión con personas de todo el mundo. Quieren saber que eres alguien con quien es fácil convivir y trabajar.",
+    redFlags: '"I prefer working alone" · "I like to give orders" · "My friends say I get angry easily"',
+    chill: "Yes, I love working with other people. My friends say I am friendly, happy, and responsible.",
+    advanced: "Yes, I thrive in collaborative environments. My friends and classmates would describe me as reliable, easygoing, and someone who always steps up to help the team when things get busy."
+  },
+  {
+    phase: "sponsor",
+    question: "What do you expect to learn from US culture, and what will you share about your own culture?",
+    laFija: "La esencia del programa. El gobierno exige que el Sponsor verifique tu interés en el intercambio cultural real. Debes mostrar orgullo por tu país y curiosidad genuina por USA.",
+    redFlags: '"I just want to go shopping" · No saber qué decir sobre tu propia comida o cultura.',
+    chill: "I want to learn about American holidays like Thanksgiving. I want to share Peruvian food, like Ceviche, with my new friends.",
+    advanced: "I\'m eager to experience everyday American lifestyle and winter traditions. In return, I\'d love to share the warmth of Peruvian culture and maybe cook traditional dishes like Lomo Saltado for my international roommates."
+  },
+  {
+    phase: "sponsor",
+    question: "Why did you choose this sponsor/agency?",
+    laFija: "Quieren ver si investigaste con quién te estás yendo o si caíste ahí de casualidad. Un poco de halago inteligente basado en hechos reales funciona perfectamente.",
+    redFlags: '"Because it was the cheapest option" · "I don\'t know, my mom paid for it"',
+    chill: "Because my friends recommended it and I saw very good reviews online.",
+    advanced: "I chose this agency because of your strong reputation for supporting J-1 students, the safety you provide, and the excellent variety of employers you partner with across the U.S."
+  }
+];
+
+// ── STATE ─────────────────────────────────────────────────────
+let currentPhase    = 'agency';
+let filteredCards   = [];
+let currentIndex    = 0;
+let isFlipped       = false;
+let dominated       = new Set(JSON.parse(localStorage.getItem('nicki_as_dominated') || '[]'));
+let expressMode     = false;
+let timerInterval   = null;
+let timeLeft        = 15;
+let isSpeaking      = false;
+
+// ── PHASE FILTER ──────────────────────────────────────────────
+function filterPhase(phase) {
+  currentPhase = phase;
+  currentIndex = 0;
+  isFlipped = false;
+  filteredCards = CARDS.filter(c => c.phase === phase);
+  // Update tab UI
+  document.querySelectorAll('.phase-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + phase).classList.add('active');
+  stopSpeaking(); stopTimer();
+  buildDots();
+  renderCard();
+  updateProgress();
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+function init() {
+  filteredCards = CARDS.filter(c => c.phase === 'agency');
+  buildDots();
+  renderCard();
+  updateProgress();
+  updateMastered();
+  document.getElementById('progressText').textContent = '0 / ' + filteredCards.length;
+}
+
+// ── RENDER CARD ───────────────────────────────────────────────
+function renderCard() {
+  if (!filteredCards.length) return;
+  const card = filteredCards[currentIndex];
+  const total = filteredCards.length;
+  document.getElementById('cardNumber').textContent = 'Pregunta ' + (currentIndex + 1) + ' de ' + total;
+  // Phase pill
+  const pill = document.getElementById('cardPhasePill');
+  if (card.phase === 'agency') {
+    pill.textContent = '🏢 Agencia';
+    pill.className = 'card-phase-pill pill-agency';
+  } else {
+    pill.textContent = '🤝 Sponsor';
+    pill.className = 'card-phase-pill pill-sponsor';
+  }
+  document.getElementById('cardQuestion').textContent  = card.question;
+  document.getElementById('backLaFija').textContent    = card.laFija;
+  document.getElementById('backRedFlags').textContent  = card.redFlags;
+  document.getElementById('backChill').textContent     = card.chill;
+  document.getElementById('backAdvanced').textContent  = card.advanced;
+  // Reset flip state
+  if (isFlipped) {
+    isFlipped = false;
+    document.getElementById('cardInner').classList.remove('flipped');
+  }
+  updateDots();
+  if (expressMode) startTimer();
+}
+
+// ── FLIP ──────────────────────────────────────────────────────
+function flipCard() {
+  isFlipped = !isFlipped;
+  document.getElementById('cardInner').classList.toggle('flipped', isFlipped);
+  if (isFlipped && expressMode) stopTimer();
+}
+
+// ── AUDIO ─────────────────────────────────────────────────────
+function speakQuestion() {
+  if (!window.speechSynthesis) { showToast('Tu navegador no soporta audio 😅'); return; }
+  if (isSpeaking) {
+    window.speechSynthesis.cancel();
+    isSpeaking = false;
+    document.getElementById('audioBtn').classList.remove('speaking');
+    return;
+  }
+  const u = new SpeechSynthesisUtterance(filteredCards[currentIndex].question);
+  u.lang = 'en-US'; u.rate = 0.88; u.pitch = 1.05;
+  const voices = window.speechSynthesis.getVoices();
+  const v = voices.find(v => v.lang === 'en-US' && v.name.includes('Samantha'))
+         || voices.find(v => v.lang === 'en-US')
+         || voices.find(v => v.lang.startsWith('en'));
+  if (v) u.voice = v;
+  u.onstart = () => { isSpeaking = true;  document.getElementById('audioBtn').classList.add('speaking'); };
+  u.onend   = () => { isSpeaking = false; document.getElementById('audioBtn').classList.remove('speaking'); };
+  u.onerror = () => { isSpeaking = false; document.getElementById('audioBtn').classList.remove('speaking'); };
+  window.speechSynthesis.speak(u);
+}
+
+// ── EXPRESS MODE ──────────────────────────────────────────────
+function toggleExpress() {
+  expressMode = !expressMode;
+  document.getElementById('toggleSwitch').classList.toggle('active', expressMode);
+  document.getElementById('timerWrap').classList.toggle('visible', expressMode);
+  if (expressMode) { showToast('⚡ Modo Express activado — 15 segundos por pregunta'); startTimer(); }
+  else { stopTimer(); }
+}
+
+function startTimer() {
+  stopTimer();
+  if (isFlipped) return;
+  timeLeft = 15;
+  updateTimerUI();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) { stopTimer(); flipCard(); showToast('⏰ ¡Tiempo! Mira la respuesta'); }
+  }, 1000);
+}
+
+function stopTimer() { clearInterval(timerInterval); timerInterval = null; }
+
+function updateTimerUI() {
+  document.getElementById('timerNumber').textContent = timeLeft;
+  const pct = timeLeft / 15;
+  document.getElementById('timerRing').style.strokeDashoffset = 201 * (1 - pct);
+  document.getElementById('timerRing').style.stroke = pct > .4 ? 'var(--rose-deep)' : '#FF4444';
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────
+function nextCard() {
+  stopSpeaking();
+  if (currentIndex < filteredCards.length - 1) { currentIndex++; renderCard(); }
+  else { checkCompletion(); }
+}
+
+function prevCard() {
+  stopSpeaking();
+  if (currentIndex > 0) { currentIndex--; renderCard(); }
+}
+
+function stopSpeaking() {
+  if (isSpeaking) {
+    window.speechSynthesis.cancel();
+    isSpeaking = false;
+    document.getElementById('audioBtn').classList.remove('speaking');
+  }
+}
+
+// ── MARK ─────────────────────────────────────────────────────
+function markDominated() {
+  const globalIdx = CARDS.indexOf(filteredCards[currentIndex]);
+  dominated.add(globalIdx);
+  localStorage.setItem('nicki_as_dominated', JSON.stringify([...dominated]));
+  updateProgress(); updateMastered(); updateDots();
+  showToast('✅ ¡Pregunta dominada! Vas full!');
+  if (dominated.size === CARDS.length) { setTimeout(showCompletion, 600); }
+  else { setTimeout(nextCard, 500); }
+}
+
+function markRepeat() {
+  showToast('🔄 Anotada para repasar');
+  setTimeout(nextCard, 400);
+}
+
+// ── PROGRESS ─────────────────────────────────────────────────
+function updateProgress() {
+  const total = filteredCards.length;
+  const done  = filteredCards.filter((c, i) => dominated.has(CARDS.indexOf(c))).length;
+  document.getElementById('progressBar').style.width = (done / total * 100) + '%';
+  document.getElementById('progressText').textContent = done + ' / ' + total;
+  document.getElementById('dominatedCount').textContent = dominated.size;
+}
+
+function updateMastered() {
+  const sec   = document.getElementById('masteredSection');
+  const chips = document.getElementById('masteredChips');
+  if (!dominated.size) { sec.classList.remove('visible'); return; }
+  sec.classList.add('visible');
+  chips.innerHTML = [...dominated].map(i => '<span class="mastered-chip">Q' + (i + 1) + '</span>').join('');
+}
+
+// ── DOTS ──────────────────────────────────────────────────────
+function buildDots() {
+  const wrap = document.getElementById('dotsWrap');
+  wrap.innerHTML = '';
+  const show = Math.min(filteredCards.length, 8);
+  for (let i = 0; i < show; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.dataset.i = i;
+    d.onclick = e => {
+      e.stopPropagation();
+      currentIndex = parseInt(e.target.dataset.i);
+      stopSpeaking(); renderCard();
+    };
+    wrap.appendChild(d);
+  }
+  updateDots();
+}
+
+function updateDots() {
+  document.querySelectorAll('.dot').forEach((dot, i) => {
+    dot.classList.remove('active', 'done');
+    const globalIdx = CARDS.indexOf(filteredCards[i]);
+    if (i === currentIndex) dot.classList.add('active');
+    else if (dominated.has(globalIdx)) dot.classList.add('done');
+  });
+}
+
+// ── COMPLETION ────────────────────────────────────────────────
+function checkCompletion() {
+  const allDone = filteredCards.every((c, i) => dominated.has(CARDS.indexOf(c)));
+  if (allDone) showCompletion();
+  else showToast('🎯 ¡Llegaste al final! Repasa las marcadas.');
+}
+
+function showCompletion() {
+  document.getElementById('completionScreen').classList.add('visible');
+  document.getElementById('cardScene').style.display = 'none';
+  document.querySelector('.action-row').style.display = 'none';
+  document.querySelector('.nav-row').style.display = 'none';
+  launchConfetti();
+}
+
+function restartAll() {
+  dominated.clear();
+  localStorage.removeItem('nicki_as_dominated');
+  currentIndex = 0;
+  document.getElementById('completionScreen').classList.remove('visible');
+  document.getElementById('cardScene').style.display = 'block';
+  document.querySelector('.action-row').style.display = 'grid';
+  document.querySelector('.nav-row').style.display = 'flex';
+  filterPhase('agency');
+  updateProgress(); updateMastered();
+}
+
+// ── CONFETTI ──────────────────────────────────────────────────
+function launchConfetti() {
+  const colors = ['#FFE4CC','#CCE8FF','#E8DEF8','#C8F0E0','#FFD6E0','#FFF0C8'];
+  const container = document.getElementById('confettiContainer');
+  container.innerHTML = '';
+  for (let i = 0; i < 80; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.cssText = 'left:' + (Math.random()*100) + 'vw;background:' + colors[Math.floor(Math.random()*colors.length)] + ';width:' + (6+Math.random()*10) + 'px;height:' + (6+Math.random()*10) + 'px;border-radius:' + (Math.random()>.5?'50%':'2px') + ';animation-duration:' + (2+Math.random()*2) + 's;animation-delay:' + (Math.random()*.8) + 's;';
+    container.appendChild(p);
+  }
+  setTimeout(() => { container.innerHTML = ''; }, 4000);
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── KEYBOARD ─────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') nextCard();
+  else if (e.key === 'ArrowLeft') prevCard();
+  else if (e.key === ' ') { e.preventDefault(); flipCard(); }
+  else if (e.key === 'Enter') markDominated();
+});
+
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+}
+
+init();
+</script>
+</body>
+</html>
